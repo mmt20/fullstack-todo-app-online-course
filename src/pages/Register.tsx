@@ -1,6 +1,7 @@
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { useForm, SubmitHandler } from "react-hook-form";
+import InputErrorMessage from "../components/ui/InputErrorMessage";
 
 interface IFormInput {
   username: string;
@@ -26,19 +27,40 @@ const RegisterPage = () => {
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <Input
           placeholder="Username"
-          {...register("username", { required: "Username is required" })}
+          {...register("username", { required: true, minLength: 5 })}
         />
+        {errors?.username && errors.username.type === "required" && (
+          <InputErrorMessage msg="Username is required" />
+        )}
+        {errors?.username && errors.username.type === "minLength" && (
+          <InputErrorMessage msg="Username should be at least 5 characters" />
+        )}
 
         <Input
-          placeholder="email address"
-          {...register("email", { required: "Email is required" })}
+          placeholder="Email address"
+          {...register("email", {
+            required: true,
+            pattern: /^[^@]+@[^@]+\.[^@.]{2,}$/,
+          })}
         />
+        {errors?.email && errors.email.type === "required" && (
+          <InputErrorMessage msg="Email is required" />
+        )}
+        {errors?.email && errors.email.type === "pattern" && (
+          <InputErrorMessage msg="Please enter a valid email address" />
+        )}
+
         <Input
           placeholder="Password"
+          type="password"
           {...register("password", { required: "Password is required" })}
         />
+        {errors?.password && errors.password.type === "required" && (
+          <InputErrorMessage msg="Password is required" />
+        )}
 
-        <Button fullWidth>Register </Button>
+        {/* Submit Button */}
+        <Button fullWidth>Register</Button>
       </form>
     </div>
   );
