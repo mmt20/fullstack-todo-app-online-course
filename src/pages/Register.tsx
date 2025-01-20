@@ -9,17 +9,34 @@ interface IFormInput {
 }
 
 const RegisterPage = () => {
-  const { register, handleSubmit } = useForm<IFormInput>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>();
   const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
+
+  console.log(errors);
+
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-center mb-4 text-3xl font-semibold">
         Register to get access!
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <Input placeholder="Username" {...register("username")} />
-        <Input placeholder="Email address" {...register("email")} />
-        <Input placeholder="Password" {...register("password")} />
+        <Input
+          placeholder="Username"
+          {...register("username", { required: "Username is required" })}
+        />
+
+        <Input
+          placeholder="email address"
+          {...register("email", { required: "Email is required" })}
+        />
+        <Input
+          placeholder="Password"
+          {...register("password", { required: "Password is required" })}
+        />
 
         <Button fullWidth>Register </Button>
       </form>
