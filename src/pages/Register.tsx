@@ -2,6 +2,9 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { useForm, SubmitHandler } from "react-hook-form";
 import InputErrorMessage from "../components/ui/InputErrorMessage";
+import { REGISTER_FORM } from "../data";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { registerSchema } from "../validation";
 
 interface IFormInput {
   username: string;
@@ -14,10 +17,33 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInput>();
-  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
+  } = useForm<IFormInput>({ resolver: yupResolver(registerSchema) });
 
-  console.log(errors);
+  // ** Handlers
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    console.log(data);
+    //**
+    //  1- Pending   => Loading
+    //  2- Fulfilled => SUCCESS => (OPTIONAL)
+    //  3- Rejected  => Field   => (OPTIONAL)
+    //   */
+  };
+
+  // ** Renders
+  const renderRegisterForm = REGISTER_FORM.map(
+    ({ name, placeholder, type, validation }, idx) => {
+      return (
+        <div key={idx}>
+          <Input
+            type={type}
+            placeholder={placeholder}
+            {...register(name, validation)}
+          />
+          {errors[name] && <InputErrorMessage msg={errors[name]?.message} />}
+        </div>
+      );
+    }
+  );
 
   return (
     <div className="max-w-md mx-auto">
@@ -25,40 +51,7 @@ const RegisterPage = () => {
         Register to get access!
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          placeholder="Username"
-          {...register("username", { required: true, minLength: 5 })}
-        />
-        {errors?.username && errors.username.type === "required" && (
-          <InputErrorMessage msg="Username is required" />
-        )}
-        {errors?.username && errors.username.type === "minLength" && (
-          <InputErrorMessage msg="Username should be at least 5 characters" />
-        )}
-
-        <Input
-          placeholder="Email address"
-          {...register("email", {
-            required: true,
-            pattern: /^[^@]+@[^@]+\.[^@.]{2,}$/,
-          })}
-        />
-        {errors?.email && errors.email.type === "required" && (
-          <InputErrorMessage msg="Email is required" />
-        )}
-        {errors?.email && errors.email.type === "pattern" && (
-          <InputErrorMessage msg="Please enter a valid email address" />
-        )}
-
-        <Input
-          placeholder="Password"
-          type="password"
-          {...register("password", { required: "Password is required" })}
-        />
-        {errors?.password && errors.password.type === "required" && (
-          <InputErrorMessage msg="Password is required" />
-        )}
-
+        {renderRegisterForm}
         {/* Submit Button */}
         <Button fullWidth>Register</Button>
       </form>
