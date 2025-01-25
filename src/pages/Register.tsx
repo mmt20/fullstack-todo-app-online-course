@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import { AxiosError } from "axios";
 import { IErrorResponse } from "../interfaces";
+import { Link, useNavigate } from "react-router-dom";
 
 interface IFormInput {
   username: string;
@@ -19,6 +20,7 @@ interface IFormInput {
 
 const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -35,18 +37,19 @@ const RegisterPage = () => {
       console.log(status);
 
       if (status === 200) {
-        toast.success(
-          "You will navigate to the page after 4 seconds to login!",
-          {
-            position: "bottom-center",
-            duration: 4000,
-            style: {
-              backgroundColor: "black",
-              color: "White",
-              width: "fit-content",
-            },
-          }
-        );
+        toast.success("You will navigate to login page after 2 seconds !", {
+          position: "bottom-center",
+          duration: 2000,
+          style: {
+            backgroundColor: "black",
+            color: "White",
+            width: "fit-content",
+          },
+        });
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       }
     } catch (error) {
       // **  3- Rejected  => Field   => (OPTIONAL)
@@ -54,7 +57,7 @@ const RegisterPage = () => {
       console.log(errObj.response?.data.error.message);
       toast.error(`${errObj.response?.data.error.message}`, {
         position: "bottom-center",
-        duration: 4000,
+        duration: 2000,
       });
     } finally {
       setIsLoading(false);
@@ -89,6 +92,16 @@ const RegisterPage = () => {
           {isLoading ? "Loading..." : "Register"}
         </Button>
       </form>
+      <p className="text-center mt-4 text-gray-600 text-sm">
+        Have account?
+        <Link
+          to="/login"
+          className="ml-2 text-indigo-600 hover:text-indigo-500 underline  transition-colors duration-300"
+          reloadDocument
+        >
+          Login
+        </Link>
+      </p>
     </div>
   );
 };

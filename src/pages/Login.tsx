@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import { IErrorResponse } from "../interfaces";
 import axIosinstance from "../config/axios.config";
+import { Link } from "react-router-dom";
 
 interface IFormInput {
   identifier: string;
@@ -17,6 +18,7 @@ interface IFormInput {
 }
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -29,19 +31,26 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       //  2- Fulfilled => SUCCESS => (OPTIONAL)
-      const { status } = await axIosinstance.post("/auth/local", data);
-      console.log(status);
+      const { status, data: resData } = await axIosinstance.post(
+        "/auth/local",
+        data
+      );
+      console.log(resData);
 
       if (status === 200) {
-        toast.success("You will navigate to Home page after 4 seconds !", {
+        toast.success("You will navigate to Home page after 2 seconds !", {
           position: "bottom-center",
-          duration: 4000,
+          duration: 2000,
           style: {
             backgroundColor: "black",
             color: "White",
             width: "fit-content",
           },
         });
+        localStorage.setItem("loggedInUser", JSON.stringify(resData));
+        setTimeout(() => {
+          location.replace("/");
+        }, 2000);
       }
     } catch (error) {
       // **  3- Rejected  => Field   => (OPTIONAL)
@@ -50,7 +59,7 @@ const LoginPage = () => {
       console.log(error);
       toast.error(`${errObj.response?.data.error.message}`, {
         position: "bottom-center",
-        duration: 4000,
+        duration: 2000,
       });
     } finally {
       setIsLoading(false);
@@ -83,6 +92,16 @@ const LoginPage = () => {
           {isLoading ? "Loading..." : "Login"}
         </Button>
       </form>
+      <p className="text-center mt-4 text-gray-600 text-sm">
+        No account?
+        <Link
+          to="/register"
+          className="ml-2 text-indigo-600 hover:text-indigo-500 underline  transition-colors duration-300"
+          reloadDocument
+        >
+          Register
+        </Link>
+      </p>
     </div>
   );
 };
