@@ -69,6 +69,26 @@ const TodoList = () => {
     console.log(event.target.value);
   };
 
+  const onRemove = async () => {
+    try {
+      const { status } = await axIosinstance.delete(`/todos/${todoToEdit.id}`, {
+        headers: {
+          Authorization: `Bearer ${userData.jwt}`,
+        },
+      });
+      if (status === 200) {
+        setTodoToEdit({
+          id: 0,
+          title: "",
+          description: "",
+        });
+        closeConfirmModal();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const submitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsUpdating(true);
@@ -169,7 +189,9 @@ const TodoList = () => {
         description="Deleting this todo will remove it permenantly from your inventory. Any associated data, sales history, and other related information will also be deleted. Please make sure this is the intended action."
       >
         <div className="flex items-center space-x-3 mt-4">
-          <Button variant="danger">Yes , Remove</Button>
+          <Button variant="danger" onClick={onRemove}>
+            Yes , Remove
+          </Button>
           <Button variant="cancel" onClick={closeConfirmModal}>
             Cancel
           </Button>
