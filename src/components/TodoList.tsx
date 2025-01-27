@@ -13,6 +13,7 @@ const TodoList = () => {
   const userDataString = localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null;
 
+  const [queryVersion, setQueryVersion] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
@@ -28,7 +29,7 @@ const TodoList = () => {
     description: "",
   });
   const { isLoading, data } = useAuthenticatedQuery({
-    queryKey: ["todoList", `${todoToEdit.id}`],
+    queryKey: ["todoList", `${queryVersion}`],
     url: "/users/me?populate=todos",
     config: {
       headers: {
@@ -103,6 +104,7 @@ const TodoList = () => {
           description: "",
         });
         closeConfirmModal();
+        setQueryVersion((prev) => prev + 1);
       }
     } catch (error) {
       console.log(error);
@@ -128,16 +130,16 @@ const TodoList = () => {
           },
         }
       );
-      console.log(res);
+
       if (res.status === 200) {
         onCloseEditModal();
+        setQueryVersion((prev) => prev + 1);
       }
     } catch (error) {
       console.log(error);
     } finally {
       setIsUpdating(false);
     }
-    console.log(todoToEdit);
   };
 
   const submitAddTodoHandler = async (event: FormEvent<HTMLFormElement>) => {
@@ -159,16 +161,16 @@ const TodoList = () => {
           },
         }
       );
-      console.log(res);
+
       if (res.status === 200) {
         onCloseAddModal();
+        setQueryVersion((prev) => prev + 1);
       }
     } catch (error) {
       console.log(error);
     } finally {
       setIsUpdating(false);
     }
-    console.log(todoToEdit);
   };
 
   if (isLoading)
