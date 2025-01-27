@@ -6,6 +6,7 @@ import Modal from "./ui/Modal";
 import Input from "./ui/Input";
 import Textarea from "./ui/Textarea";
 import axIosinstance from "../config/axios.config";
+import TodoSkeleton from "./TodoSkeleton ";
 
 const TodoList = () => {
   const storageKey = "loggedInUser";
@@ -14,15 +15,18 @@ const TodoList = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
+  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
 
   const [todoToEdit, setTodoToEdit] = useState<ITodo>({
     id: 0,
     title: "",
     description: "",
   });
-
-  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
-
+  const [todoToAdd, setTodoToAdd] = useState({
+    title: "",
+    description: "",
+  });
   const { isLoading, data } = useAuthenticatedQuery({
     queryKey: ["todoList", `${todoToEdit.id}`],
     url: "/users/me?populate=todos",
@@ -34,6 +38,17 @@ const TodoList = () => {
   });
 
   // ** Handlers
+
+  const onCloseAddModal = () => {
+    setTodoToAdd({
+      title: "",
+      description: "",
+    });
+    setIsOpenAddModal(false);
+  };
+  const onOpenAddModal = () => {
+    setIsOpenAddModal(true);
+  };
 
   const onCloseEditModal = () => {
     setTodoToEdit({
@@ -60,13 +75,18 @@ const TodoList = () => {
     setTodoToEdit(todo);
     setIsOpenConfirmModal(true);
   };
-  const onHangeHandler = (
+  const onChangeHandler = (
     event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
     const { value, name } = event.target;
-    // ** name
     setTodoToEdit({ ...todoToEdit, [name]: value });
-    console.log(event.target.value);
+  };
+
+  const onChangeAddTodoHandler = (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const { value, name } = event.target;
+    setTodoToAdd({ ...todoToAdd, [name]: value });
   };
 
   const onRemove = async () => {
@@ -120,17 +140,63 @@ const TodoList = () => {
     console.log(todoToEdit);
   };
 
-  if (isLoading) return <h3>Is Loading ...</h3>;
+  const submitAddTodoHandler = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsUpdating(true);
+    const { title, description } = todoToAdd;
+    try {
+      const res = await axIosinstance.post(
+        `/todos`,
+        {
+          data: {
+            title,
+            description,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userData.jwt}`,
+          },
+        }
+      );
+      console.log(res);
+      if (res.status === 200) {
+        onCloseAddModal();
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsUpdating(false);
+    }
+    console.log(todoToEdit);
+  };
+
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 3 }, (_, idx) => (
+          <TodoSkeleton key={idx} />
+        ))}
+      </div>
+    );
 
   return (
     <div className="space-y-1 ">
+      <div className="flex w-fit mx-auto my-10 gap-x-2">
+        <Button variant="default" size={"sm"} onClick={onOpenAddModal}>
+          Post new todo
+        </Button>
+      </div>
+
       {data.todos.length ? (
         data.todos.map((todo: ITodo) => (
           <div
             key={todo.id}
             className="flex items-center justify-between hover:bg-gray-100 duration-300 p-3 rounded-md even:bg-gray-100"
           >
-            <p className="w-full font-semibold">1 - {todo.title}</p>
+            <p className="w-full font-semibold">
+              {todo.id} - {todo.title}
+            </p>
             <div className="flex items-center justify-end w-full space-x-3">
               <Button size={"sm"} onClick={() => onOpenEditModal(todo)}>
                 Edit
@@ -148,7 +214,37 @@ const TodoList = () => {
       ) : (
         <h3>No todos yet!</h3>
       )}
-
+      {/* Add Todo modal */}
+      <Modal
+        isOpen={isOpenAddModal}
+        closeModal={onCloseAddModal}
+        description=""
+        title="Add New Todo"
+      >
+        <form className="space-y-3" onSubmit={submitAddTodoHandler}>
+          <Input
+            name="title"
+            value={todoToAdd.title}
+            onChange={onChangeAddTodoHandler}
+          />
+          <Textarea
+            name="description"
+            value={todoToAdd.description}
+            onChange={onChangeAddTodoHandler}
+          />
+          <div className="flex items-center space-x-3 mt-4">
+            <Button
+              isLoading={isUpdating}
+              className="bg-indigo-700 hover:bg-indigo-800 "
+            >
+              Done
+            </Button>
+            <Button variant={"cancel"} onClick={onCloseAddModal}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
       {/* Edit Todo modal */}
       <Modal
         isOpen={isEditModalOpen}
@@ -160,12 +256,12 @@ const TodoList = () => {
           <Input
             name="title"
             value={todoToEdit.title}
-            onChange={onHangeHandler}
+            onChange={onChangeHandler}
           />
           <Textarea
             name="description"
             value={todoToEdit.description}
-            onChange={onHangeHandler}
+            onChange={onChangeHandler}
           />
           <div className="flex items-center space-x-3 mt-4">
             <Button
