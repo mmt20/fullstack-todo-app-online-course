@@ -1,6 +1,6 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import Button from "./ui/Button";
-import useAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
+import useQustomQuery from "../hooks/useQustomQuery";
 import { ITodo } from "../interfaces";
 import Modal from "./ui/Modal";
 import Input from "./ui/Input";
@@ -28,7 +28,7 @@ const TodoList = () => {
     title: "",
     description: "",
   });
-  const { isLoading, data } = useAuthenticatedQuery({
+  const { isLoading, data } = useQustomQuery({
     queryKey: ["todoList", `${queryVersion}`],
     url: "/users/me?populate=todos",
     config: {
@@ -204,6 +204,7 @@ const TodoList = () => {
                 Edit
               </Button>
               <Button
+                type="button"
                 variant={"danger"}
                 size={"sm"}
                 onClick={() => openConfirmModal(todo)}
@@ -241,7 +242,7 @@ const TodoList = () => {
             >
               Done
             </Button>
-            <Button variant={"cancel"} onClick={onCloseAddModal}>
+            <Button type="button" variant={"cancel"} onClick={onCloseAddModal}>
               Cancel
             </Button>
           </div>
@@ -272,7 +273,7 @@ const TodoList = () => {
             >
               Update
             </Button>
-            <Button variant={"cancel"} onClick={onCloseEditModal}>
+            <Button type="button" variant={"cancel"} onClick={onCloseEditModal}>
               Cancel
             </Button>
           </div>
@@ -290,7 +291,7 @@ const TodoList = () => {
           <Button variant="danger" onClick={onRemove}>
             Yes , Remove
           </Button>
-          <Button variant="cancel" onClick={closeConfirmModal}>
+          <Button type="button" variant="cancel" onClick={closeConfirmModal}>
             Cancel
           </Button>
         </div>
