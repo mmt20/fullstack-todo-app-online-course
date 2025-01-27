@@ -7,6 +7,7 @@ import Input from "./ui/Input";
 import Textarea from "./ui/Textarea";
 import axIosinstance from "../config/axios.config";
 import TodoSkeleton from "./TodoSkeleton ";
+import { faker } from "@faker-js/faker";
 
 const TodoList = () => {
   const storageKey = "loggedInUser";
@@ -47,6 +48,7 @@ const TodoList = () => {
     });
     setIsOpenAddModal(false);
   };
+
   const onOpenAddModal = () => {
     setIsOpenAddModal(true);
   };
@@ -59,6 +61,7 @@ const TodoList = () => {
     });
     setIsEditModalOpen(false);
   };
+
   const onOpenEditModal = (todo: ITodo) => {
     setIsEditModalOpen(true);
     setTodoToEdit(todo);
@@ -72,10 +75,12 @@ const TodoList = () => {
     });
     setIsOpenConfirmModal(false);
   };
+
   const openConfirmModal = (todo: ITodo) => {
     setTodoToEdit(todo);
     setIsOpenConfirmModal(true);
   };
+
   const onChangeHandler = (
     event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
@@ -90,7 +95,34 @@ const TodoList = () => {
     setTodoToAdd({ ...todoToAdd, [name]: value });
   };
 
-  const onRemove = async () => {
+  const onGenrateTodos = async () => {
+    // ** 100 recored
+    for (let i = 0; i < 100; i++) {
+      try {
+        const { data } = await axIosinstance.post(
+          `/todos`,
+          {
+            data: {
+              title: faker.word.words(5),
+              description: faker.lorem.paragraph({ min: 1, max: 3 }),
+              user: [userData.user.id],
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${userData.jwt}`,
+            },
+          }
+        );
+
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  const onSubmitRemoveTodo = async () => {
     try {
       const { status } = await axIosinstance.delete(`/todos/${todoToEdit.id}`, {
         headers: {
@@ -111,7 +143,7 @@ const TodoList = () => {
     }
   };
 
-  const submitHandler = async (event: FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsUpdating(true);
     const { title, description } = todoToEdit;
@@ -142,7 +174,7 @@ const TodoList = () => {
     }
   };
 
-  const submitAddTodoHandler = async (event: FormEvent<HTMLFormElement>) => {
+  const onSubmitAddTodoHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsUpdating(true);
     const { title, description } = todoToAdd;
@@ -153,6 +185,7 @@ const TodoList = () => {
           data: {
             title,
             description,
+            user: [userData.user.id],
           },
         },
         {
@@ -185,8 +218,11 @@ const TodoList = () => {
   return (
     <div className="space-y-1 ">
       <div className="flex w-fit mx-auto my-10 gap-x-2">
-        <Button variant="default" size={"sm"} onClick={onOpenAddModal}>
+        <Button variant="default" onClick={onOpenAddModal} size={"sm"}>
           Post new todo
+        </Button>
+        <Button variant="outline" size={"sm"} onClick={onGenrateTodos}>
+          Generate todos
         </Button>
       </div>
 
@@ -224,7 +260,7 @@ const TodoList = () => {
         description=""
         title="Add New Todo"
       >
-        <form className="space-y-3" onSubmit={submitAddTodoHandler}>
+        <form className="space-y-3" onSubmit={onSubmitAddTodoHandler}>
           <Input
             name="title"
             value={todoToAdd.title}
@@ -255,7 +291,7 @@ const TodoList = () => {
         description=""
         title="Edit this todo"
       >
-        <form className="space-y-3" onSubmit={submitHandler}>
+        <form className="space-y-3" onSubmit={onSubmitHandler}>
           <Input
             name="title"
             value={todoToEdit.title}
@@ -288,7 +324,7 @@ const TodoList = () => {
         description="Deleting this todo will remove it permenantly from your inventory. Any associated data, sales history, and other related information will also be deleted. Please make sure this is the intended action."
       >
         <div className="flex items-center space-x-3 mt-4">
-          <Button variant="danger" onClick={onRemove}>
+          <Button variant="danger" onClick={onSubmitRemoveTodo}>
             Yes , Remove
           </Button>
           <Button type="button" variant="cancel" onClick={closeConfirmModal}>
