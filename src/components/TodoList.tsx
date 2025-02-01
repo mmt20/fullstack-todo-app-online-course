@@ -25,10 +25,12 @@ const TodoList = () => {
     title: "",
     description: "",
   });
+
   const [todoToAdd, setTodoToAdd] = useState({
     title: "",
     description: "",
   });
+
   const { isLoading, data } = useQustomQuery({
     queryKey: ["todoList", `${queryVersion}`],
     url: "/users/me?populate=todos",

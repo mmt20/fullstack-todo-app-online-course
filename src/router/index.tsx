@@ -10,6 +10,7 @@ import ErrorHandler from "../components/errors/ErrorHandler";
 import HomePage from "../pages";
 import LoginPage from "../pages/Login";
 import RegisterPage from "../pages/Register";
+import TodosPage from "../pages/Todos";
 
 const storageKey = "loggedInUser";
 const userDataString = localStorage.getItem(storageKey);
@@ -65,6 +66,18 @@ const router = createBrowserRouter(
               data={userData}
             >
               <h2>Profile Page</h2>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="todos"
+          element={
+            <ProtectedRoute
+              isAllowed={userData?.jwt}
+              redirectPath="/login"
+              data={userData}
+            >
+              <TodosPage />
             </ProtectedRoute>
           }
         />
